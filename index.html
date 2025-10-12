@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Student Info Form — Fill Up</title>
+<style>
+  :root{--green:#1b7a3f;--bg:#f6fff6;--card:#fff;--muted:#3d6b53}
+  *{box-sizing:border-box;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
+  body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--bg),#eefbf0);color:var(--muted);display:flex;align-items:center;justify-content:center;padding:20px}
+  .wrap{width:100%;max-width:880px;background:var(--card);border-radius:12px;padding:22px;box-shadow:0 10px 30px rgba(20,60,30,0.06)}
+  header{display:flex;gap:12px;align-items:center}
+  .logo{width:44px;height:44px;border-radius:10px;background:var(--green);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+  h1{margin:0;color:var(--green);font-size:1.05rem}
+  p.lead{margin:0;color:#5d8a6f}
+  form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  label{font-size:.9rem;color:#3c5f49;margin-bottom:6px;display:block}
+  input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e2f2e6;background:#fbfffb;font-size:.95rem}
+  textarea{min-height:88px;resize:vertical;grid-column:1 / -1}
+  .full{grid-column:1 / -1}
+  .actions{display:flex;justify-content:space-between;align-items:center;grid-column:1 / -1;margin-top:12px}
+  .btn{background:var(--green);color:white;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+  .btn.ghost{background:transparent;color:var(--green);border:1px solid rgba(27,120,63,0.12)}
+  small.note{color:#7f9f88}
+  @media(max-width:720px){form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+  <main class="wrap" aria-labelledby="title">
+    <header>
+      <div class="logo">CDM</div>
+      <div>
+        <h1 id="title">Student Info Form</h1>
+        <p class="lead">Minimal • Offline • LocalStorage</p>
+      </div>
+    </header>
+
+    <form id="studentForm" autocomplete="off" novalidate>
+      <div>
+        <label for="firstName">First Name *</label>
+        <input id="firstName" name="firstName" required />
+      </div>
+
+      <div>
+        <label for="lastName">Last Name *</label>
+        <input id="lastName" name="lastName" required />
+      </div>
+
+      <div>
+        <label for="studentNo">Student No.</label>
+        <input id="studentNo" name="studentNo" placeholder="e.g. 34-68920" />
+      </div>
+
+      <div>
+        <label for="age">Age</label>
+        <input id="age" name="age" type="number" min="1" />
+      </div>
+
+      <div>
+        <label for="course">Course / Program</label>
+        <input id="course" name="course" />
+      </div>
+
+      <div>
+        <label for="yearLevel">Year Level</label>
+        <select id="yearLevel" name="yearLevel">
+          <option value="">-- Select --</option>
+          <option>1st Year</option>
+          <option>2nd Year</option>
+          <option>3rd Year</option>
+          <option>4th Year</option>
+          <option>5th Year</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Gender</label>
+        <div style="display:flex;gap:10px;align-items:center">
+          <label><input type="radio" name="gender" value="Male"> Male</label>
+          <label><input type="radio" name="gender" value="Female"> Female</label>
+          <label><input type="radio" name="gender" value="Other"> Other</label>
+        </div>
+      </div>
+
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" />
+      </div>
+
+      <div>
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" />
+      </div>
+
+      <div class="full">
+        <label for="address">Address</label>
+        <textarea id="address" name="address" placeholder="Street, City, Province"></textarea>
+      </div>
+
+      <div class="actions full">
+        <div>
+          <button type="reset" class="btn ghost">Reset</button>
+          <small class="note" style="margin-left:8px">Fields saved locally — no server involved.</small>
+        </div>
+        <div>
+          <button type="button" id="previewBtn" class="btn">Review & Confirm</button>
+          <a href="next.html" class="btn ghost" style="text-decoration:none;margin-left:8px;padding:9px 12px">Manage Students</a>
+        </div>
+      </div>
+    </form>
+  </main>
+
+<script>
+  // Collect form values
+  function collect() {
+    const form = document.getElementById('studentForm');
+    const gender = form.gender && [].slice.call(form.gender).find(r => r.checked);
+    return {
+      id: String(Date.now()), // simple unique id
+      firstName: (form.firstName.value || '').trim(),
+      lastName: (form.lastName.value || '').trim(),
+      studentNo: (form.studentNo.value || '').trim(),
+      age: (form.age.value || '').trim(),
+      course: (form.course.value || '').trim(),
+      yearLevel: form.yearLevel.value || '',
+      gender: gender ? gender.value : '',
+      email: (form.email.value || '').trim(),
+      phone: (form.phone.value || '').trim(),
+      address: (form.address.value || '').trim(),
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  // Prefill if editing a pending draft
+  window.addEventListener('DOMContentLoaded', () => {
+    try {
+      const draft = localStorage.getItem('pendingStudent');
+      if (!draft) return;
+      const s = JSON.parse(draft);
+      document.getElementById('firstName').value = s.firstName || '';
+      document.getElementById('lastName').value = s.lastName || '';
+      document.getElementById('studentNo').value = s.studentNo || '';
+      document.getElementById('age').value = s.age || '';
+      document.getElementById('course').value = s.course || '';
+      document.getElementById('yearLevel').value = s.yearLevel || '';
+      if (s.gender) {
+        const rb = document.querySelectorAll('input[name="gender"]');
+        rb.forEach(r => { if (r.value === s.gender) r.checked = true; });
+      }
+      document.getElementById('email').value = s.email || '';
+      document.getElementById('phone').value = s.phone || '';
+      document.getElementById('address').value = s.address || '';
+    } catch(e){ /* ignore */ }
+  });
+
+  document.getElementById('previewBtn').addEventListener('click', () => {
+    const s = collect();
+    if (!s.firstName || !s.lastName) {
+      alert('Please provide First Name and Last Name.');
+      return;
+    }
+    // save a draft pendingStudent (overwritten until confirmed)
+    localStorage.setItem('pendingStudent', JSON.stringify(s));
+    location.href = 'confirm.html';
+  });
+</script>
+</body>
+</html>

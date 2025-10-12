@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Confirm — Student Info</title>
+<style>
+  :root{--green:#1b7a3f;--bg:#f6fff6;--card:#fff;--muted:#3d6b53}
+  *{box-sizing:border-box;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif}
+  body{margin:0;background:linear-gradient(180deg,var(--bg),#eefbf0);color:var(--muted);display:flex;align-items:center;justify-content:center;padding:20px}
+  .wrap{width:100%;max-width:880px;background:var(--card);border-radius:12px;padding:22px;box-shadow:0 10px 30px rgba(20,60,30,0.06)}
+  h1{margin:0;color:var(--green);font-size:1.05rem}
+  .grid{display:grid;grid-template-columns:160px 1fr;gap:8px 12px;margin-top:14px}
+  dt{color:#6b8a72;font-size:.9rem}
+  dd{margin:0;font-weight:600}
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+  .btn{background:var(--green);color:white;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+  .btn.ghost{background:transparent;color:var(--green);border:1px solid rgba(27,120,63,0.12)}
+  p.note{color:#6f9a80;margin-top:10px}
+  @media(max-width:720px){.grid{grid-template-columns:120px 1fr}}
+</style>
+</head>
+<body>
+  <main class="wrap" aria-labelledby="title">
+    <h1 id="title">Review & Confirm</h1>
+    <p class="note">Check the details below. Confirm to add to the saved students list. Edit returns to the form.</p>
+
+    <dl class="grid" id="detailsArea" aria-live="polite">
+      <!-- populated by JS -->
+    </dl>
+
+    <div class="actions">
+      <button id="editBtn" class="btn ghost">Edit</button>
+      <button id="confirmBtn" class="btn">Confirm & Save</button>
+    </div>
+    <p style="margin-top:12px;font-size:.9rem;color:#7f9f88">All data stored locally in your browser. Works offline.</p>
+  </main>
+
+<script>
+  function renderPending() {
+    const raw = localStorage.getItem('pendingStudent');
+    const dl = document.getElementById('detailsArea');
+    if (!raw) {
+      alert('No pending student found. Returning to form.');
+      location.href = 'index.html';
+      return;
+    }
+    const s = JSON.parse(raw);
+    function r(k,v){ const dt=document.createElement('dt'); dt.textContent=k; const dd=document.createElement('dd'); dd.textContent=v||'-'; dl.appendChild(dt); dl.appendChild(dd); }
+    dl.innerHTML = '';
+    r('First Name', s.firstName);
+    r('Last Name', s.lastName);
+    r('Student No.', s.studentNo);
+    r('Age', s.age);
+    r('Course', s.course);
+    r('Year Level', s.yearLevel);
+    r('Gender', s.gender);
+    r('Email', s.email);
+    r('Phone', s.phone);
+    r('Address', s.address);
+    r('Created', new Date(s.createdAt).toLocaleString());
+  }
+  renderPending();
+
+  document.getElementById('editBtn').addEventListener('click', () => {
+    // keep pendingStudent in localStorage and return to form
+    location.href = 'index.html';
+  });
+
+  document.getElementById('confirmBtn').addEventListener('click', () => {
+    const raw = localStorage.getItem('pendingStudent');
+    if (!raw) return alert('No pending student to save.');
+    const s = JSON.parse(raw);
+    // load existing students (array of objects)
+    const arrRaw = localStorage.getItem('students') || '[]';
+    let arr = [];
+    try { arr = JSON.parse(arrRaw); if (!Array.isArray(arr)) arr = []; } catch(e){ arr = []; }
+    // push and save
+    arr.push(s);
+    localStorage.setItem('students', JSON.stringify(arr));
+    // clear pending
+    localStorage.removeItem('pendingStudent');
+    // go to manager
+    location.href = 'next.html';
+  });
+</script>
+</body>
+</html>
